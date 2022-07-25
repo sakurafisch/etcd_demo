@@ -1,5 +1,7 @@
 # etcd 示例程序
 
-## VS Code 插件
+本项目是一个 etcd 示例程序。本项目运行一个 etcd 实例，并通过 restful api 提供对 etcd 中 key-value pairs 的操作。
 
-[REST Client](https://open-vsx.org/extension/humao/rest-client)
+## REST Client
+
+./restClient 目录下的文件是用于开发时测试的， 可以使用 REST Client 插件
