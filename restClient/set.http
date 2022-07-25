@@ -1,0 +1,1 @@
+GET http://localhost:9503/set?key=samplekey&value=samplevalue
