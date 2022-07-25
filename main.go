@@ -37,7 +37,7 @@ func main() {
 		}
 		if key == "" {
 			c.JSON(http.StatusNotAcceptable, gin.H{
-				"msg": "keycan not be empty",
+				"msg": "key can not be empty",
 			})
 			c.Abort()
 			return
