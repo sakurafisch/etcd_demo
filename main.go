@@ -24,6 +24,38 @@ func init() {
 
 func main() {
 	defer close()
+	setup_ginS()
+	ginS.Run(":9503")
+}
+
+func clean() {
+	clean := exec.Command("python", "clean.py")
+	err := clean.Run()
+	if err != nil {
+		log.Fatalln("fail to run clean.py")
+	}
+}
+
+func start_etcd() {
+	etcdmain.Main([]string{""})
+}
+
+func setup_client() {
+	var err error
+	etcd_client, err = clientv3.New(clientv3.Config{
+		Endpoints:   []string{"127.0.0.1:2379"},
+		DialTimeout: 5 * time.Second,
+	})
+	if err != nil {
+		log.Fatalln(err)
+	}
+}
+
+func close() {
+	etcd_client.Close()
+}
+
+func setup_ginS() {
 	ginS.GET("/", func(c *gin.Context) {
 		c.String(200, "Hello Etcd!")
 	})
@@ -77,34 +109,10 @@ func main() {
 		c.JSON(http.StatusOK, get_key(key))
 		c.Abort()
 	})
-	ginS.Run(":9503")
-}
-
-func clean() {
-	clean := exec.Command("python", "clean.py")
-	err := clean.Run()
-	if err != nil {
-		log.Fatalln("fail to run clean.py")
-	}
-}
-
-func start_etcd() {
-	etcdmain.Main([]string{""})
-}
-
-func setup_client() {
-	var err error
-	etcd_client, err = clientv3.New(clientv3.Config{
-		Endpoints:   []string{"127.0.0.1:2379"},
-		DialTimeout: 5 * time.Second,
+	ginS.Any("/all", func(c *gin.Context) {
+		c.JSON(http.StatusOK, get_all())
+		c.Abort()
 	})
-	if err != nil {
-		log.Fatalln(err)
-	}
-}
-
-func close() {
-	etcd_client.Close()
 }
 
 func set_key(key string, value string) *clientv3.PutResponse {
@@ -129,6 +137,25 @@ func set_key(key string, value string) *clientv3.PutResponse {
 func get_key(key string) *clientv3.GetResponse {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	resp, err := etcd_client.Get(ctx, key)
+	cancel()
+	if err != nil {
+		switch err {
+		case context.Canceled:
+			log.Fatalf("ctx is canceled by another routine: %v\n", err)
+		case context.DeadlineExceeded:
+			log.Fatalf("ctx is attached with a deadline is exceeded: %v\n", err)
+		case rpctypes.ErrEmptyKey:
+			log.Fatalf("client-side error: %v\n", err)
+		default:
+			log.Fatalf("bad cluster endpoints, which are not etcd servers: %v\n", err)
+		}
+	}
+	return resp
+}
+
+func get_all() *clientv3.GetResponse {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	resp, err := etcd_client.Get(ctx, "", clientv3.WithPrefix())
 	cancel()
 	if err != nil {
 		switch err {

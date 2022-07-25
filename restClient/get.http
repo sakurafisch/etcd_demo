@@ -1,1 +1,1 @@
-GET http://127.0.0.1:9503/get?key=samlekey
+GET http://localhost:9503/get?key=samplekey
