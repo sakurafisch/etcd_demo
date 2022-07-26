@@ -76,7 +76,7 @@ func setup_ginS() {
 		c.JSON(http.StatusOK, util.DeteleKey(key))
 		c.Abort()
 	})
-	ginS.Any("deleteall", func(c *gin.Context) {
+	ginS.Any("/deleteall", func(c *gin.Context) {
 		c.JSON(http.StatusOK, util.DeleteAll())
 		c.Abort()
 	})
