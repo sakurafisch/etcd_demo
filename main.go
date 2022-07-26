@@ -38,6 +38,7 @@ func startEtcd() {
 func setup_ginS() {
 	ginS.GET("/", func(c *gin.Context) {
 		c.String(200, "Hello Etcd!")
+		c.Abort()
 	})
 	ginS.Any("/set", func(c *gin.Context) {
 		key := checkParamEmpty("key", c)
@@ -73,6 +74,11 @@ func setup_ginS() {
 			return
 		}
 		c.JSON(http.StatusOK, util.DeteleKey(key))
+		c.Abort()
+	})
+	ginS.Any("deleteall", func(c *gin.Context) {
+		c.JSON(http.StatusOK, util.DeleteAll())
+		c.Abort()
 	})
 }
 

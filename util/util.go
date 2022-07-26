@@ -62,6 +62,14 @@ func DeteleKey(key string) *clientv3.DeleteResponse {
 	return resp
 }
 
+func DeleteAll() *clientv3.DeleteResponse {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	resp, err := etcd_client.Delete(ctx, "", clientv3.WithPrefix())
+	cancel()
+	handleError(err)
+	return resp
+}
+
 func handleError(err error) {
 	if err == nil {
 		return
