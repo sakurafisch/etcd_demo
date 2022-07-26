@@ -86,3 +86,22 @@ func GetAll() *clientv3.GetResponse {
 	}
 	return resp
 }
+
+func DeteleKey(key string) *clientv3.DeleteResponse {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	resp, err := etcd_client.Delete(ctx, key)
+	cancel()
+	if err != nil {
+		switch err {
+		case context.Canceled:
+			log.Fatalf("ctx is canceled by another routine: %v\n", err)
+		case context.DeadlineExceeded:
+			log.Fatalf("ctx is attached with a deadline is exceeded: %v\n", err)
+		case rpctypes.ErrEmptyKey:
+			log.Fatalf("client-side error: %v\n", err)
+		default:
+			log.Fatalf("bad cluster endpoints, which are not etcd servers: %v\n", err)
+		}
+	}
+	return resp
+}

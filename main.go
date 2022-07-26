@@ -93,4 +93,21 @@ func setup_ginS() {
 		c.JSON(http.StatusOK, util.GetAll())
 		c.Abort()
 	})
+	ginS.Any("/delete", func(c *gin.Context) {
+		key := c.Param("key")
+		if key == "" {
+			key = c.Query("key")
+		}
+		if key == "" {
+			key = c.PostForm("key")
+		}
+		if key == "" {
+			c.JSON(http.StatusNotFound, gin.H{
+				"msg": "key can not be empty",
+			})
+			c.Abort()
+			return
+		}
+		c.JSON(http.StatusOK, util.DeteleKey(key))
+	})
 }
