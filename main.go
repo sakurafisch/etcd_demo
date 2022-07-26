@@ -40,31 +40,13 @@ func setup_ginS() {
 		c.String(200, "Hello Etcd!")
 	})
 	ginS.Any("/set", func(c *gin.Context) {
-		key := c.Param("key")
+		key := checkParamEmpty("key", c)
 		if key == "" {
-			key = c.Query("key")
-		}
-		if key == "" {
-			key = c.PostForm("key")
-		}
-		if key == "" {
-			c.JSON(http.StatusNotAcceptable, gin.H{
-				"msg": "key can not be empty",
-			})
 			c.Abort()
 			return
 		}
-		value := c.Param("value")
+		value := checkParamEmpty("value", c)
 		if value == "" {
-			value = c.Query("value")
-		}
-		if value == "" {
-			value = c.PostForm("value")
-		}
-		if value == "" {
-			c.JSON(http.StatusNotAcceptable, gin.H{
-				"msg": "value can not be empty",
-			})
 			c.Abort()
 			return
 		}
@@ -72,17 +54,8 @@ func setup_ginS() {
 		c.Abort()
 	})
 	ginS.Any("/get", func(c *gin.Context) {
-		key := c.Param("key")
+		key := checkParamEmpty("key", c)
 		if key == "" {
-			key = c.Query("key")
-		}
-		if key == "" {
-			key = c.PostForm("key")
-		}
-		if key == "" {
-			c.JSON(http.StatusNotFound, gin.H{
-				"msg": "key can not be empty",
-			})
 			c.Abort()
 			return
 		}
@@ -94,20 +67,29 @@ func setup_ginS() {
 		c.Abort()
 	})
 	ginS.Any("/delete", func(c *gin.Context) {
-		key := c.Param("key")
+		key := checkParamEmpty("key", c)
 		if key == "" {
-			key = c.Query("key")
-		}
-		if key == "" {
-			key = c.PostForm("key")
-		}
-		if key == "" {
-			c.JSON(http.StatusNotFound, gin.H{
-				"msg": "key can not be empty",
-			})
 			c.Abort()
 			return
 		}
 		c.JSON(http.StatusOK, util.DeteleKey(key))
 	})
+}
+
+func checkParamEmpty(paramName string, c *gin.Context) string {
+	param := c.Param(paramName)
+	if param == "" {
+		param = c.Query(paramName)
+	}
+	if param == "" {
+		param = c.PostForm(paramName)
+	}
+	if param == "" {
+		c.JSON(http.StatusNotFound, gin.H{
+			"msg": paramName + " can not be empty",
+		})
+		c.Abort()
+		return ""
+	}
+	return param
 }
